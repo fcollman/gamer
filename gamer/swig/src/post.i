@@ -16,11 +16,11 @@
 // generated wrapper code, but also parsed by SWIG to generate wrapper code
 %inline%{
     
-static FLTVECT* _Vertex_getitem(SurfaceMesh* surfmesh, unsigned int i){
+static FLTBAREVECT* _Vertex_getitem(SurfaceMesh* surfmesh, unsigned int i){
   return surfmesh->vertex + i;
 }
 
-static INT3VECT* _Face_getitem(SurfaceMesh* surfmesh, unsigned int i){
+static INTBARE3VECT* _Face_getitem(SurfaceMesh* surfmesh, unsigned int i){
   return surfmesh->face + i;
 }
 
@@ -37,6 +37,9 @@ static FETK_SS* _GemMesh_tet_getitem(GemMesh* gem_mesh, unsigned int i){
 // Extend both the C and Python interface of SurfaceMesh 
 %extend SurfaceMesh {
 
+  SurfaceMesh(float *vertices, int *faces, int numberofvertices, int numberoffaces){
+    
+  }
   // Create a surface mesh by triangulating a list of connected segments
   SurfaceMesh(double* pointlist, int numberofcoordinates, 
 	      char* triangle_quality_params="q20")
@@ -47,6 +50,7 @@ static FETK_SS* _GemMesh_tet_getitem(GemMesh* gem_mesh, unsigned int i){
     return SurfaceMesh_triangulate(pointlist, numberofcoordinates, triangle_params);
   }
 
+  SurfaceMesh()
   // Create an empty mesh 
   SurfaceMesh(unsigned int num_vertices, unsigned int num_faces)
   {

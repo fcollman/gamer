@@ -106,6 +106,33 @@ SurfaceMesh* SurfaceMesh_ctor(unsigned int num_vertices, unsigned int num_faces)
   return surfmesh;
 }
 
+SurfaceMesh* SurfaceMesh_from_verts_and_faces(unsigned int num_vertices, unsigned int num_faces,
+                                              FLTBAREVECT* vertices, FLT3INT* faces){
+
+  SurfaceMesh* surfmesh = (SurfaceMesh*)malloc(sizeof(SurfaceMesh));
+  surfmesh->num_vertices = num_vertices;
+  surfmesh->num_faces = num_faces;
+  surfmesh->vertex = vertices;
+  surfmesh->vertex_marker = (int *)malloc(sizeof(int)*num_vertices);
+  surfmesh->vertex_select = (bool *)malloc(sizeof(bool)*num_vertices);
+  surfmesh->face  = faces;
+  surfmesh->faces_marker = (int *)malloc(sizeof(int)*num_faces);
+  surfmesh->faces_select = (bool *)malloc(sizeof(bool)*num_faces);
+  
+  surfmesh->neighbor = NULL;
+  surfmesh->neighbor_list = NULL;
+  surfmesh->avglen = 0.;
+  surfmesh->min[0] = 0.; surfmesh->min[1] = 0.; surfmesh->min[2] = 0.;
+  surfmesh->max[0] = 0.; surfmesh->max[1] = 0.; surfmesh->max[2] = 0.;
+  surfmesh->closed = true;
+  surfmesh->marker = 1;
+  surfmesh->volume_constraint = 100; 
+  surfmesh->use_volume_constraint = false; 
+  surfmesh->as_hole = false; 
+
+
+  return surfmesh;
+  }                           
 /*
  * ***************************************************************************
  * Routine:  SurfaceMesh_dtor

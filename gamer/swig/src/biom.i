@@ -72,6 +72,14 @@ typedef struct
   float x;   /**< @brief x-coordinate */
   float y;   /**< @brief y-coordinate */
   float z;   /**< @brief z-coordinate */
+}FLTBAREVECT;
+
+/** @brief Other data structure FLTVECT (float) */
+typedef struct 
+{
+  float x;   /**< @brief x-coordinate */
+  float y;   /**< @brief y-coordinate */
+  float z;   /**< @brief z-coordinate */
   int m;     /**< @brief Marker */
   bool sel;  /**< @brief selection flag */
 }FLTVECT;
@@ -93,6 +101,14 @@ typedef struct
   int m;     /**< @brief Marker */
   bool sel;  /**< @brief selection flag */
 }INT3VECT;
+
+/** @brief Other data structure INT3VECT (int) */
+typedef struct 
+{
+  int a;     /**< @brief first integer */
+  int b;     /**< @brief second integer */
+  int c;     /**< @brief third integer */
+}INTBARE3VECT;
 
 /** @brief Other data structure INT4VECT (int) */
 typedef struct 
@@ -123,6 +139,7 @@ typedef struct
   float volume_constraint; /**< @brief volume constraint of the tetrahedralized domain */
   bool use_volume_constraint; /**< @brief flag that determines if the volume constraint is used */
   bool as_hole; /**< @brief flag that determines if the mesh is a hole or not */
+  
 }SurfaceMesh;
 
 typedef struct FETK_VX
