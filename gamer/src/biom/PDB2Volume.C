@@ -34,6 +34,7 @@
 
 
 #include "PDB2Volume.h"
+#include <algorithm>
 
 #define EPSILON		 1.0e-3f
 #define MAX_STRING       256 
@@ -324,7 +325,7 @@ float PDB2Volume(char *filename, float **data, int *xd, int *yd, int *zd,
   p_max[1] = max[1];
   p_max[2] = max[2];
 
-  min_dimension = min((max[0]-min[0]),min((max[1]-min[1]),(max[2]-min[2])));
+  min_dimension = std::min((max[0]-min[0]),std::min((max[1]-min[1]),(max[2]-min[2])));
   if (min_dimension < 64.0f) {
     min_dimension = 64.0f/min_dimension;
     dim[0] = (int)((max[0]-min[0])*min_dimension)+1;

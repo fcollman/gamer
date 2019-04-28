@@ -53,14 +53,26 @@ SurfaceMesh* SurfaceMesh_ctor(unsigned int num_vertices, unsigned int num_faces)
   SurfaceMesh* surfmesh = (SurfaceMesh*)malloc(sizeof(SurfaceMesh));
   surfmesh->num_vertices = num_vertices;
   surfmesh->num_faces = num_faces;
-  if (num_vertices)
-    surfmesh->vertex = (FLTVECT*)malloc(sizeof(FLTVECT)*num_vertices);
-  else
+  if (num_vertices){
+    surfmesh->vertex = (FLTBAREVECT*)malloc(sizeof(FLTBAREVECT)*num_vertices);
+    surfmesh->vertex_marker = (int *)malloc(sizeof(int)*num_vertices);
+    surfmesh->vertex_select = (bool *)malloc(sizeof(bool)*num_vertices);
+  }
+  else{
     surfmesh->vertex = NULL;
-  if (num_faces)
-    surfmesh->face = (INT3VECT*)malloc(sizeof(INT3VECT)*num_faces);
-  else
+    surfmesh->vertex_marker = NULL;
+    surfmesh->vertex_select = NULL;
+  }
+  if (num_faces){
+    surfmesh->face = (INTBARE3VECT*)malloc(sizeof(INTBARE3VECT)*num_faces);
+    surfmesh->face_marker = (int *)malloc(sizeof(int)*num_faces);
+    surfmesh->face_select = (bool *)malloc(sizeof(bool)*num_faces);
+  }
+  else{
     surfmesh->face = NULL;
+    surfmesh->face_marker = NULL;
+    surfmesh->face_select = NULL;
+  }
   surfmesh->neighbor = NULL;
   surfmesh->neighbor_list = NULL;
   surfmesh->avglen = 0.;
@@ -70,16 +82,18 @@ SurfaceMesh* SurfaceMesh_ctor(unsigned int num_vertices, unsigned int num_faces)
   // Initialize SurfaceMesh structures
   for (int n = 0; n < num_vertices; n++)
   {
-    FLTVECT& vert = surfmesh->vertex[n];
-    vert.x = vert.y = vert.z = vert.m = 0;
-    vert.sel = true;
+    FLTBAREVECT& vert = surfmesh->vertex[n];
+    vert.x = vert.y = vert.z = 0;
+    surfmesh->vertex_marker[n]=0;
+    surfmesh->vertex_select[n]=false;
   }
   
   for (int n = 0; n < num_faces; n++)
   {
-    INT3VECT& face = surfmesh->face[n];
-    face.a = face.b = face.c = face.m = 0;
-    face.sel = true;
+    INTBARE3VECT& face = surfmesh->face[n];
+    face.a = face.b = face.c;
+    surfmesh->face_marker[n]=0;
+    surfmesh->face_select[n]=false;
   }
 
   // Initialize domain data
@@ -162,7 +176,7 @@ void SurfaceMesh_createNeighborlist(SurfaceMesh* surfmesh)
     neighbor_list[n] = NULL;
 
     // Default mark all vertices for deletion
-    surfmesh->vertex[n].m = -1;
+    surfmesh->vertex_marker[n]= -1;
   }
 
   // Iterate over the faces and collect line segments (a, b) and its connection 
@@ -187,9 +201,9 @@ void SurfaceMesh_createNeighborlist(SurfaceMesh* surfmesh)
     neighbor_list[a] = first_ngr;
 
     // Mark vertex as connected
-    if (surfmesh->vertex[a].m<0)
+    if (surfmesh->vertex_marker[a]<0)
     {
-      surfmesh->vertex[a].m = 0;
+      surfmesh->vertex_marker[a] = 0;
       num_connected += 1;
     }
 
@@ -201,9 +215,9 @@ void SurfaceMesh_createNeighborlist(SurfaceMesh* surfmesh)
     neighbor_list[b] = first_ngr;
 
     // Mark vertex as connected
-    if (surfmesh->vertex[b].m<0)
+    if (surfmesh->vertex_marker[b]<0)
     {
-      surfmesh->vertex[b].m = 0;
+      surfmesh->vertex_marker[b] = 0;
       num_connected += 1;
     }
     
@@ -215,9 +229,9 @@ void SurfaceMesh_createNeighborlist(SurfaceMesh* surfmesh)
     neighbor_list[c] = first_ngr;
 
     // Mark vertex as connected
-    if (surfmesh->vertex[c].m<0)
+    if (surfmesh->vertex_marker[c]<0)
     {
-      surfmesh->vertex[c].m = 0;
+      surfmesh->vertex_marker[c] = 0;
       num_connected += 1;
     }
     
@@ -300,7 +314,7 @@ void SurfaceMesh_createNeighborlist(SurfaceMesh* surfmesh)
 	}
 	  
 	// Do not bail, just register the vertex to not be done anything with
-	surfmesh->vertex[n].sel = false;
+	surfmesh->vertex_select[n] = false;
 
 	closed = false;
       }
@@ -317,7 +331,7 @@ void SurfaceMesh_createNeighborlist(SurfaceMesh* surfmesh)
 	     surfmesh->vertex[n].y, surfmesh->vertex[n].z);
       
       // Do not bail, just register the vertex to not be done anything with
-      surfmesh->vertex[n].sel = false;
+      surfmesh->vertex_select[n] = false;
       
       closed = false;
     }
@@ -411,7 +425,7 @@ void SurfaceMesh_removeUnconnectedVertices(SurfaceMesh* surfmesh)
   std::vector<int> to_be_removed(surfmesh->num_vertices);
   for (int n = 0; n < surfmesh->num_vertices; n++)
   {
-    if (surfmesh->vertex[n].m<0)
+    if (surfmesh->vertex_marker[n]<0)
       num_to_be_removed++;
     to_be_removed[n] = num_to_be_removed;
   }
@@ -430,8 +444,8 @@ void SurfaceMesh_removeUnconnectedVertices(SurfaceMesh* surfmesh)
     surfmesh->vertex[n-to_be_removed[n]].x = surfmesh->vertex[n].x;
     surfmesh->vertex[n-to_be_removed[n]].y = surfmesh->vertex[n].y;
     surfmesh->vertex[n-to_be_removed[n]].z = surfmesh->vertex[n].z;
-    surfmesh->vertex[n-to_be_removed[n]].sel = surfmesh->vertex[n].sel;
-    surfmesh->vertex[n-to_be_removed[n]].m = surfmesh->vertex[n].m;
+    surfmesh->vertex_select[n-to_be_removed[n]] = surfmesh->vertex_select[n];
+    surfmesh->vertex_marker[n-to_be_removed[n]] = surfmesh->vertex_marker[n];
   }
     
   // Fix face offset
@@ -461,11 +475,11 @@ void SurfaceMesh_deleteVertices(SurfaceMesh* surfmesh)
   // Mark faces connected to vertices for deletion
   for (int n=0; n < surfmesh->num_faces; n++)
   {
-    if (surfmesh->vertex[surfmesh->face[n].a].m < 0 ||
-	surfmesh->vertex[surfmesh->face[n].b].m < 0 ||
-	surfmesh->vertex[surfmesh->face[n].c].m < 0 )
+    if (surfmesh->vertex_marker[surfmesh->face[n].a] < 0 ||
+	surfmesh->vertex_marker[surfmesh->face[n].b] < 0 ||
+	surfmesh->vertex_marker[surfmesh->face[n].c] < 0 )
     {
-      surfmesh->face[n].m = -1;
+      surfmesh->face_marker[n] = -1;
     }
   }
 
@@ -488,14 +502,14 @@ void SurfaceMesh_deleteFaces(SurfaceMesh* surfmesh)
 
   // Iterate over vertices and mark all for deletion
   for (int n=0; n < surfmesh->num_vertices; n++)
-    surfmesh->vertex[n].m = -1;
+    surfmesh->vertex_marker[n]= -1;
   
   // Delete faces connected to vertices
   int num_removed = 0;
   for (int n=0; n < surfmesh->num_faces; n++)
   {
     // Check for removal of face
-    if (surfmesh->face[n].m < 0)
+    if (surfmesh->face_marker[n] < 0)
       num_removed += 1;
     else 
     {
@@ -506,14 +520,14 @@ void SurfaceMesh_deleteFaces(SurfaceMesh* surfmesh)
 	surfmesh->face[n-num_removed].a = surfmesh->face[n].a;
 	surfmesh->face[n-num_removed].b = surfmesh->face[n].b;
 	surfmesh->face[n-num_removed].c = surfmesh->face[n].c;
-	surfmesh->face[n-num_removed].m = surfmesh->face[n].m;
-	surfmesh->face[n-num_removed].sel = surfmesh->face[n].sel;
+	surfmesh->face_marker[n-num_removed] = surfmesh->face_marker[n];
+	surfmesh->face_select[n-num_removed] = surfmesh->face_select[n];
       }
 
       // Un mark vertex for deletion
-      surfmesh->vertex[surfmesh->face[n].a].m = 0;
-      surfmesh->vertex[surfmesh->face[n].b].m = 0;
-      surfmesh->vertex[surfmesh->face[n].c].m = 0;
+      surfmesh->vertex_marker[surfmesh->face[n].a] = 0;
+      surfmesh->vertex_marker[surfmesh->face[n].b] = 0;
+      surfmesh->vertex_marker[surfmesh->face[n].c] = 0;
     }
   }
 
@@ -635,7 +649,7 @@ void SurfaceMesh_eigenvalues(SurfaceMesh* surfmesh){
   {
 
     // If we have a vertex wich is not selected we continue
-    if (!surfmesh->vertex[n].sel)
+    if (!surfmesh->vertex_select[n])
       continue;
     
     eigen_vect = GetEigenVector(surfmesh, n, &eigen_value, &max_angle);
@@ -688,7 +702,7 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
 	}
 	  
 	// Do not bail, just register the vertex to not be done anything with
-	surfmesh->vertex[n].sel = false;
+	surfmesh->vertex_select[n] = false;
 
 	closed = false;
       }
@@ -714,7 +728,9 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
   
   // Scratch data
   std::vector<NPNT3 *> tmp_neighborgs(0);
-  std::vector<FLTVECT> tmp_vertices(0);
+  std::vector<FLTBAREVECT> tmp_vertices(0);
+  std::vector<int> tmp_vertex_marker(0);
+  std::vector<bool> tmp_vertex_select(0);
   std::vector<int> not_fixed_verts(0);
 
   printf("Trying to repair miss connected mesh.\n");
@@ -730,7 +746,7 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
     int num_second = 0;
 
     // Gather data for averaging vert coordinates of connected vertices
-    FLTVECT first_vert, second_vert;
+    FLTBAREVECT first_vert, second_vert;
     first_vert.x = first_vert.y = first_vert.z = 0;
     second_vert.x = second_vert.y = second_vert.z = 0;
     
@@ -818,11 +834,11 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
  	    new_number_of_vertices += 1;
 
  	    // Select vertex
- 	    surfmesh->vertex[n].sel = true;
+ 	    surfmesh->vertex_select[n] = true;
 
  	    // Register the vertices for addition
  	    tmp_vertices.push_back(surfmesh->vertex[n]);
- 	    FLTVECT& tmp_vertex = tmp_vertices[tmp_vertices.size()-1];
+ 	    FLTBAREVECT& tmp_vertex = tmp_vertices[tmp_vertices.size()-1];
 
  	    // Find mid point of vertex rings
  	    first_vert.x /= num_first;
@@ -927,8 +943,9 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
     return;
   
   // Add collected vertices and neighbors
-  FLTVECT* new_vertices = (FLTVECT*)malloc(sizeof(FLTVECT)*new_number_of_vertices);
-  
+  FLTBAREVECT* new_vertices = (FLTBAREVECT*)malloc(sizeof(FLTBAREVECT)*new_number_of_vertices);
+  int* vertex_markers = (int*)malloc(sizeof(int)*new_number_of_vertices);
+  bool* vertex_select = (bool*)malloc(sizeof(bool)*new_number_of_vertices);
   // Counter for added new entities
   m = 0;
   for (n = 0; n < new_number_of_vertices; n++)
@@ -941,8 +958,8 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
  	new_vertices[n].x = surfmesh->vertex[n].x;
  	new_vertices[n].y = surfmesh->vertex[n].y;
  	new_vertices[n].z = surfmesh->vertex[n].z;
- 	new_vertices[n].sel = surfmesh->vertex[n].sel;
- 	new_vertices[n].m = surfmesh->vertex[n].m;
+ 	vertex_select[n] = surfmesh->vertex_select[n];
+ 	vertex_markers[n]= surfmesh->vertex_marker[n];
  	
     }
     else
@@ -952,8 +969,7 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
  	new_vertices[n].x = tmp_vertices[m].x;
  	new_vertices[n].y = tmp_vertices[m].y;
  	new_vertices[n].z = tmp_vertices[m].z;
- 	new_vertices[n].sel = tmp_vertices[m].sel;
- 	new_vertices[n].m = tmp_vertices[m].m;
+
  	
  	m++;
  	
@@ -967,6 +983,8 @@ void SurfaceMesh_splitMultipleConnectedSurfaces(SurfaceMesh* surfmesh)
   free(surfmesh->vertex);
   surfmesh->vertex = new_vertices;
   surfmesh->num_vertices = new_number_of_vertices;
+  surfmesh->vertex_marker = vertex_markers;
+  surfmesh->vertex_select = vertex_select;
   surfmesh->closed = true;
 
   // Debug

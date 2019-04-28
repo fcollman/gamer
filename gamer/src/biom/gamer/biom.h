@@ -73,11 +73,11 @@
 /** @brief Other definition */
 #define IndexVect(i,j,k) ((k)*xdim*ydim + (j)*xdim + (i))
 #define IndexVect1(i,j,k) ((k)*xdim1*ydim1 + (j)*xdim1 + (i))
-/** @brief Other definition */
-#define max(x, y)        ((x>y) ? (x):(y))
-/** @brief Other definition */
-#define min(x, y)        ((x<y) ? (x):(y))
-
+// /** @brief Other definition */
+// #define max(x, y)        ((x>y) ? (x):(y))
+// /** @brief Other definition */
+// #define min(x, y)        ((x<y) ? (x):(y))
+#define NOMINMAX
 /** @brief Other definition */
 #define _LITTLE_ENDIAN   1
 
@@ -86,6 +86,13 @@ typedef struct {
   float x;   /**< @brief x-coordinate */
   float y;   /**< @brief y-coordinate */
 }FLT2VECT;
+
+/** @brief Other data structure FLTVECT (float) */
+typedef struct {
+  float x;   /**< @brief x-coordinate */
+  float y;   /**< @brief y-coordinate */
+  float z;   /**< @brief z-coordinate */
+}FLTBAREVECT;
 
 /** @brief Other data structure FLTVECT (float) */
 typedef struct {
@@ -111,6 +118,13 @@ typedef struct {
   int m;     /**< @brief Marker */
   bool sel;  /**< @brief selection flag */
 }INT3VECT;
+
+/** @brief Other data structure INT3VECT (int) */
+typedef struct {
+  int a;     /**< @brief first integer */
+  int b;     /**< @brief second integer */
+  int c;     /**< @brief third integer */
+}INTBARE3VECT;
 
 /** @brief Other data structure INT4VECT (int) */
 typedef struct {
@@ -154,10 +168,15 @@ typedef struct {
   float avglen;   /**< @brief average edge length */
   float min[3];   /**< @brief minimal coordinate of nodes */
   float max[3];   /**< @brief maximal coordinate of nodes */
-  FLTVECT* vertex;   /**< @brief pointer to the vertices */
-  INT3VECT* face;    /**< @brief pointer to the triangles */
-  INT3VECT* neighbor;    /**< @brief pointer to the neighbors (triangles) */
+  FLTBAREVECT* vertex;   /**< @brief pointer to the vertices */
+  INTBARE3VECT* face;    /**< @brief pointer to the triangles */
+  INTBARE3VECT* neighbor;    /**< @brief pointer to the neighbors (triangles) */
   NPNT3** neighbor_list; /**< @brief pointer to the neighbor list */
+  int *face_marker;
+  int *vertex_marker;
+  bool *face_select;
+  bool *vertex_select;
+
   bool closed;           /**< @brief is the surface mesh closed or not */
   int marker;            /**< @brief doman marker, to be used when tetrahedralizing */
   float volume_constraint; /**< @brief volume constraint of the tetrahedralized domain */
@@ -207,9 +226,12 @@ typedef struct GemMesh{
 typedef struct {
   int num_vertices;  
   int num_cells; 
-  FLTVECT *vertex;   /**< @brief pointer to the vertices */
+  FLTBAREVECT *vertex;   /**< @brief pointer to the vertices */
+  int *vertex_marker;
+  bool *vertex_select;
   INT4VECT *face;   /**< @brief pointer to the tetrahedra */
   INT4VECT *neighbor;   /**< @brief pointer to the neighbors (tetrahedra) */
+
 }TeTraMesh;
 
 /** @brief Other data structure SPNT */

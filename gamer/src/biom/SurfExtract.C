@@ -56,10 +56,10 @@ void SurfaceExtract(TeTraMesh* volmesh, SurfaceMesh* surfmesh)
   char *boundary_flag;
   char surf_flag;
   unsigned int num_surfaces_vertices;
-  INT3VECT* surfmesh_face; 
+  INTBARE3VECT* surfmesh_face; 
 
   // Initalize enough memory
-  surfmesh_face = (INT3VECT*)malloc(sizeof(INT3VECT)*volmesh->num_cells);
+  surfmesh_face = (INTBARE3VECT*)malloc(sizeof(INTBARE3VECT)*volmesh->num_cells);
  
   /* Classify the vertices into boundary or interior */
   boundary_flag = (char *)malloc(sizeof(char)*volmesh->num_vertices);
@@ -227,8 +227,13 @@ void SurfaceExtract(TeTraMesh* volmesh, SurfaceMesh* surfmesh)
   // Assign new memory to the surface mesh
   surfmesh->num_vertices = num_vertices;
   surfmesh->num_faces = face_num;
-  surfmesh->vertex = (FLTVECT*)malloc(sizeof(FLTVECT)*num_vertices);
-  surfmesh->face = (INT3VECT*)malloc(sizeof(INT3VECT)*face_num);
+  surfmesh->vertex = (FLTBAREVECT*)malloc(sizeof(FLTBAREVECT)*num_vertices);
+  surfmesh->face = (INTBARE3VECT*)malloc(sizeof(INTBARE3VECT)*face_num);
+  surfmesh->vertex_marker = (int *)malloc(sizeof(int)*num_vertices);
+  surfmesh->vertex_select = (bool *)malloc(sizeof(bool)*num_vertices);
+  surfmesh->face_marker = (int *)malloc(sizeof(int)*face_num);
+  surfmesh->face_select = (bool *)malloc(sizeof(bool)*face_num);
+
   
   // Assign vertex coordinates to surface mesh
   vertex_index = 0;
@@ -238,6 +243,8 @@ void SurfaceExtract(TeTraMesh* volmesh, SurfaceMesh* surfmesh)
       surfmesh->vertex[vertex_index].x = volmesh->vertex[n].x;
       surfmesh->vertex[vertex_index].y = volmesh->vertex[n].y;
       surfmesh->vertex[vertex_index].z = volmesh->vertex[n].z;
+      surfmesh->vertex_marker[vertex_index] = 0;
+      surfmesh->vertex_select[vertex_index] = false;
       vertex_indices[n] = vertex_index;
       vertex_index++;
     }
@@ -251,6 +258,7 @@ void SurfaceExtract(TeTraMesh* volmesh, SurfaceMesh* surfmesh)
     surfmesh->face[n].a = vertex_indices[surfmesh_face[n].a];
     surfmesh->face[n].b = vertex_indices[surfmesh_face[n].b];
     surfmesh->face[n].c = vertex_indices[surfmesh_face[n].c];
+
   }
   
   printf("Surface Mesh Extracted: Nodes = %d, Faces = %d\n\n", surfmesh->num_vertices, surfmesh->num_faces);

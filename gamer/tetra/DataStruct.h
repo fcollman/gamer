@@ -186,10 +186,6 @@ typedef struct {
 }
 #endif
 
-#ifndef min
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#endif
 #ifndef MATHPI
 #define MATHPI (3.1415926535897)
 #endif

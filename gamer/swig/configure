@@ -15877,10 +15877,14 @@ EOD`
 
 # There should be only one
 from distutils.sysconfig import get_config_var, get_config_vars, get_python_lib
-shared_lib_extension = get_config_var('SO')
-if 'SOABI' in get_config_vars():
-    shared_lib_extension = shared_lib_extension.replace('.'+get_config_var('SOABI'), '', 1)
-print (shared_lib_extension)
+import sys
+if sys.platform == "darwin": # Mac OS X:
+  print('.dylib')
+else:
+  shared_lib_extension = get_config_var('SO')
+  if 'SOABI' in get_config_vars():
+      shared_lib_extension = shared_lib_extension.replace('.'+get_config_var('SOABI'), '', 1)
+  print(shared_lib_extension)
 EOD`
 
 		# Now, for the library:

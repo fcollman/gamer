@@ -32,7 +32,7 @@
 #include <gamer/biom.h>
 #include "gamercf.h"
 
-
+#include <algorithm>
 /*
  * ***************************************************************************
  * Routine:  SurfaceMesh_refine
@@ -155,8 +155,8 @@ void SurfaceMesh_refine(SurfaceMesh* surfmesh)
 
     // Iterate over the vertices and find the edges
     for (m = 0; m < 3; m++){
-      min_vertex_num = min(local_vertices[m], local_vertices[(m+1)%3]);
-      max_vertex_num = max(local_vertices[m], local_vertices[(m+1)%3]);
+      min_vertex_num = std::min(local_vertices[m], local_vertices[(m+1)%3]);
+      max_vertex_num = std::max(local_vertices[m], local_vertices[(m+1)%3]);
       
       // Find the edge number that fit the pair of vertices
       for (k = 0; k < num_edges[min_vertex_num]; k++)

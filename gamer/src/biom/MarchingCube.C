@@ -37,7 +37,8 @@
 
 
 #include "MarchingCube.h"
- 
+#include <algorithm>
+
 SurfaceMesh* SurfaceMesh_marchingCube(int xdim, int ydim, int zdim, float* dataset, 
 				      float isovalue, float* intensity, 
 				      float intensity_isovalue, SPNT **holelist);
@@ -123,9 +124,9 @@ SurfaceMesh* SurfaceMesh_marchingCube(int xdim, int ydim, int zdim, float* datas
     tempt_x = triangle[stack_size].a;
     tempt_y = triangle[stack_size].b;
     tempt_z = triangle[stack_size].c;
-    for (k=max(tempt_z-1,0); k<=min(tempt_z+1,zdim-1); k++) 
-      for (j=max(tempt_y-1,0); j<=min(tempt_y+1,ydim-1); j++) 
-	for (i=max(tempt_x-1,0); i<=min(tempt_x+1,xdim-1); i++) {
+    for (k=(std::max)(tempt_z-1,0); k<=(std::min)(tempt_z+1,zdim-1); k++) 
+      for (j=(std::max)(tempt_y-1,0); j<=(std::min)(tempt_y+1,ydim-1); j++) 
+	for (i=(std::max)(tempt_x-1,0); i<=(std::min)(tempt_x+1,xdim-1); i++) {
 	  if (dataset[IndexVect(i,j,k)] < isovalue &&
 	      mc_sign[IndexVect(i,j,k)] == 0) {
 	    mc_sign[IndexVect(i,j,k)] = 1;
@@ -162,9 +163,9 @@ SurfaceMesh* SurfaceMesh_marchingCube(int xdim, int ydim, int zdim, float* datas
 	    tempt_x = triangle[stack_size].a;
 	    tempt_y = triangle[stack_size].b;
 	    tempt_z = triangle[stack_size].c;
-	    for (k=max(tempt_z-1,0); k<=min(tempt_z+1,zdim-1); k++) 
-	      for (j=max(tempt_y-1,0); j<=min(tempt_y+1,ydim-1); j++) 
-		for (i=max(tempt_x-1,0); i<=min(tempt_x+1,xdim-1); i++) {
+	    for (k=(std::max)(tempt_z-1,0); k<=(std::min)(tempt_z+1,zdim-1); k++) 
+	      for (j=(std::max)(tempt_y-1,0); j<=(std::min)(tempt_y+1,ydim-1); j++) 
+		for (i=(std::max)(tempt_x-1,0); i<=(std::min)(tempt_x+1,xdim-1); i++) {
 		  if (dataset[IndexVect(i,j,k)] < isovalue &&
 		      mc_sign[IndexVect(i,j,k)] == 0) {
 		    mc_sign[IndexVect(i,j,k)] = 1;
@@ -188,9 +189,9 @@ SurfaceMesh* SurfaceMesh_marchingCube(int xdim, int ydim, int zdim, float* datas
 	      tempt_x = triangle[stack_size].a;
 	      tempt_y = triangle[stack_size].b;
 	      tempt_z = triangle[stack_size].c;
-	      for (k=max(tempt_z-1,0); k<=min(tempt_z+1,zdim-1); k++) 
-		for (j=max(tempt_y-1,0); j<=min(tempt_y+1,ydim-1); j++) 
-		  for (i=max(tempt_x-1,0); i<=min(tempt_x+1,xdim-1); i++) {
+	      for (k=(std::max)(tempt_z-1,0); k<=(std::min)(tempt_z+1,zdim-1); k++) 
+		for (j=(std::max)(tempt_y-1,0); j<=(std::min)(tempt_y+1,ydim-1); j++) 
+		  for (i=(std::max)(tempt_x-1,0); i<=(std::min)(tempt_x+1,xdim-1); i++) {
 		    if (dataset[IndexVect(i,j,k)] < isovalue) {
 		      dataset[IndexVect(i,j,k)] = max_density;
 		      triangle[stack_size].a = i;

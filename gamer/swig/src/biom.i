@@ -54,10 +54,7 @@
 /** @brief Other definition */
 #define IndexVect(i,j,k) ((k)*xdim*ydim + (j)*xdim + (i))
 #define IndexVect1(i,j,k) ((k)*xdim1*ydim1 + (j)*xdim1 + (i))
-/** @brief Other definition */
-#define max(x, y)        ((x>y) ? (x):(y))
-/** @brief Other definition */
-#define min(x, y)        ((x<y) ? (x):(y))
+
 
 /** @brief Other definition */
 #define _LITTLE_ENDIAN   1

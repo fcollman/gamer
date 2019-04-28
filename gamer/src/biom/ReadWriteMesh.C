@@ -408,9 +408,9 @@ SurfaceMesh* SurfaceMesh_readPoly(char *input_name)
     surfmesh->vertex[n].x = tetio.pointlist[n*3];
     surfmesh->vertex[n].y = tetio.pointlist[n*3+1];
     surfmesh->vertex[n].z = tetio.pointlist[n*3+2];
-    surfmesh->vertex[n].sel = true;
+    surfmesh->vertex_select[n] = true;
     if (tetio.pointmarkerlist!=NULL)
-      surfmesh->vertex[n].m = tetio.pointmarkerlist[n];
+      surfmesh->vertex_marker[n] = tetio.pointmarkerlist[n];
     
   }
   
@@ -435,11 +435,11 @@ SurfaceMesh* SurfaceMesh_readPoly(char *input_name)
     surfmesh->face[n].a = tetio.facetlist[n].polygonlist[0].vertexlist[0]-1;
     surfmesh->face[n].b = tetio.facetlist[n].polygonlist[0].vertexlist[1]-1;
     surfmesh->face[n].c = tetio.facetlist[n].polygonlist[0].vertexlist[2]-1;
-    surfmesh->face[n].sel = true;
+    surfmesh->face_select[n] = true;
 
     // Check for facet marker info
     if (tetio.facetmarkerlist!=NULL)
-      surfmesh->face[n].m = tetio.facetmarkerlist[n];
+      surfmesh->face_marker= tetio.facetmarkerlist;
     
   }
   
@@ -478,7 +478,7 @@ void SurfaceMesh_writePoly(SurfaceMesh* surfmesh, char *filename)
   fprintf(fout, "%d 1\n", surfmesh->num_vertices);
   for (i = 0; i < surfmesh->num_faces; i++) 
   {
-    fprintf(fout, "1 0 %d\n", surfmesh->face[i].m);
+    fprintf(fout, "1 0 %d\n", surfmesh->face_marker[i]);
     fprintf(fout, "3 %d %d %d\n",surfmesh->face[i].a+1, surfmesh->face[i].b+1, \
 	    surfmesh->face[i].c+1);
   }
@@ -589,7 +589,7 @@ SurfaceMesh* SurfaceMesh_readOFF(char *input_name)
       }
       
       // Get the first face marker
-      surfmesh->face[0].m = rgb_to_marker(color_r, color_g, color_b);
+      surfmesh->face_marker[0] = rgb_to_marker(color_r, color_g, color_b);
 
       while (fgetc(fin) != '\n'){}
     }
@@ -619,7 +619,7 @@ SurfaceMesh* SurfaceMesh_readOFF(char *input_name)
 	}
       
 	// Get the other face markers
-	surfmesh->face[n].m = rgb_to_marker(color_r, color_g, color_b);
+	surfmesh->face_marker[n] = rgb_to_marker(color_r, color_g, color_b);
 
       }
 
@@ -644,6 +644,8 @@ SurfaceMesh* SurfaceMesh_readOFF(char *input_name)
 
     // We have allready read the vertex coordinates
     volmesh->vertex = surfmesh->vertex;
+    volmesh->vertex_marker = surfmesh->vertex_marker;
+    volmesh->vertex_select = surfmesh->vertex_select;
 
     // Assign memory for faces
     volmesh->face = (INT4VECT *)malloc(sizeof(INT4VECT)*volmesh->num_cells);
@@ -976,7 +978,7 @@ void GemMesh_writeCarp(GemMesh* out, char* basename, int num_boundaries,
   FILE *fout;
   FETK_VX* vv;
   FETK_SS* ss;
-  INT3VECT* triangle;
+  INTBARE3VECT* triangle;
 
   // Collect face information
   std::map<int, std::set<int> > vertex_markers;

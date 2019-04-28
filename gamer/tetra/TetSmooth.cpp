@@ -24,7 +24,7 @@
 #include <fstream>
 #include <vector>
 #include "TetSmooth.h"
-
+#include <algorithm>
 // global variables
 int							m_numVer = 0;
 std::vector<verElement*>	verList;
@@ -1163,8 +1163,8 @@ int ComputeDihedralAngles_All(void)
 	{
 		ComputeDiAngle_SigleTet(&(tetMESH[itet]), localMinAngle, localMaxAngle);
 		
-		minAngle = min(minAngle,localMinAngle);
-		maxAngle = max(maxAngle,localMaxAngle);
+		minAngle = std::min(minAngle,localMinAngle);
+		maxAngle = std::max(maxAngle,localMaxAngle);
 	}
 
 	m_minMinAngle = minAngle;
@@ -1198,8 +1198,8 @@ double ComputeLocalAngle(const int verIndex,double& localMaxAngle)
 
 		curAngle = ComputeMinDiAngle(curVerCoord,faceNodes[0],faceNodes[1],faceNodes[2]);
 		
-		minDiAngle = min(minDiAngle,curAngle);		
-		maxDiAngle = max(maxDiAngle,curAngle);
+		minDiAngle = std::min(minDiAngle,curAngle);		
+		maxDiAngle = std::max(maxDiAngle,curAngle);
 	}
 	
 	return minDiAngle;
@@ -1213,19 +1213,19 @@ double ComputeMinDiAngle(const DBL3DVECT& P1,const DBL3DVECT& P2,const DBL3DVECT
 	minAngle = ComputeDiAngle(P1,P2,P3,P4);	
 	
 	curDiAngle = ComputeDiAngle(P1,P3, P2,P4);
-	minAngle = min(minAngle,curDiAngle); 	
+	minAngle = std::min(minAngle,curDiAngle); 	
 	
 	curDiAngle = ComputeDiAngle(P1,P4, P2,P3);
-	minAngle = min(minAngle,curDiAngle); 
+	minAngle = std::min(minAngle,curDiAngle); 
 	
 	curDiAngle = ComputeDiAngle(P2,P3, P1,P4);
-	minAngle = min(minAngle,curDiAngle); 
+	minAngle = std::min(minAngle,curDiAngle); 
 	
 	curDiAngle = ComputeDiAngle(P2,P4, P1,P3);
-	minAngle = min(minAngle,curDiAngle); 
+	minAngle = std::min(minAngle,curDiAngle); 
 	
 	curDiAngle = ComputeDiAngle(P3,P4, P1,P2);
-	minAngle = min(minAngle,curDiAngle); 
+	minAngle = std::min(minAngle,curDiAngle); 
 	
 	return minAngle;
 }
@@ -1240,24 +1240,24 @@ int ComputeDiAngle_SigleTet(const tetElement* curTet, double& minAngle,double& m
 	minAngle = maxAngle = ComputeDiAngle(verPt[0],verPt[1],verPt[2],verPt[3]);
 	
 	curDiAngle = ComputeDiAngle(verPt[0],verPt[2], verPt[1],verPt[3]);
-	minAngle = min(minAngle,curDiAngle);
-	maxAngle = max(maxAngle, curDiAngle);
+	minAngle = std::min(minAngle,curDiAngle);
+	maxAngle = std::max(maxAngle, curDiAngle);
 	
 	curDiAngle = ComputeDiAngle(verPt[0],verPt[3], verPt[1],verPt[2]);
-	minAngle = min(minAngle,curDiAngle); 
-	maxAngle = max(maxAngle, curDiAngle);
+	minAngle = std::min(minAngle,curDiAngle); 
+	maxAngle = std::max(maxAngle, curDiAngle);
 	
 	curDiAngle = ComputeDiAngle(verPt[1],verPt[2], verPt[0],verPt[3]);
-	minAngle = min(minAngle,curDiAngle); 
-	maxAngle = max(maxAngle, curDiAngle);
+	minAngle = std::min(minAngle,curDiAngle); 
+	maxAngle = std::max(maxAngle, curDiAngle);
 	
 	curDiAngle = ComputeDiAngle(verPt[1],verPt[3], verPt[0],verPt[2]);
-	minAngle = min(minAngle,curDiAngle); 
-	maxAngle = max(maxAngle, curDiAngle);
+	minAngle = std::min(minAngle,curDiAngle); 
+	maxAngle = std::max(maxAngle, curDiAngle);
 	
 	curDiAngle = ComputeDiAngle(verPt[2],verPt[3], verPt[0],verPt[1]);
-	minAngle = min(minAngle,curDiAngle); 
-	maxAngle = max(maxAngle, curDiAngle);
+	minAngle = std::min(minAngle,curDiAngle); 
+	maxAngle = std::max(maxAngle, curDiAngle);
 	
 	return 0;
 }
@@ -1468,9 +1468,9 @@ int LoadData(const char* filename)
 		newVer->m_x = x; newVer->m_y = y; newVer->m_z = z;
 		verList[iver] = newVer;
 
-			ori_minX = min(ori_minX,x); ori_maxX = max(ori_maxX,x); 
-			ori_minY = min(ori_minY,y); ori_maxY = max(ori_maxY,y);
-			ori_minZ = min(ori_minZ,z); ori_maxZ = max(ori_maxZ,z);
+			ori_minX = std::min(ori_minX,x); ori_maxX = std::max(ori_maxX,x); 
+			ori_minY = std::min(ori_minY,y); ori_maxY = std::max(ori_maxY,y);
+			ori_minZ = std::min(ori_minZ,z); ori_maxZ = std::max(ori_maxZ,z);
 	}
 	
 	m_oriMetric = (ori_maxX - ori_minX + ori_maxY - ori_minY + ori_maxZ - ori_minZ) / 3;

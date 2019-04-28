@@ -140,7 +140,7 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh** surfmeshes, int num_surface_mes
   unsigned int num_regions = 0, num_holes = 0;
   SurfaceMesh* surfmesh;
   FLTVECT normal, midpoint;
-  INT3VECT face0;
+  INTBARE3VECT face0;
 
   tetgenio in, out;
   tetgenio::facet *f;
@@ -242,7 +242,7 @@ GemMesh* GemMesh_fromSurfaceMeshes(SurfaceMesh** surfmeshes, int num_surface_mes
       p->vertexlist[0] = surfmesh->face[j].a + in.firstnumber + num_vertices;
       p->vertexlist[1] = surfmesh->face[j].b + in.firstnumber + num_vertices;
       p->vertexlist[2] = surfmesh->face[j].c + in.firstnumber + num_vertices;
-      in.facetmarkerlist[j+num_faces] = surfmesh->face[j].m == -1 ? 0 : surfmesh->face[j].m;
+      in.facetmarkerlist[j+num_faces] = surfmesh->face_marker[j] == -1 ? 0 : surfmesh->face_marker[j];
     }
 
     // Get region or hole coordinate by using a face
@@ -418,9 +418,9 @@ GemMesh* GemMesh_fromTetgen(tetgenio& tetio)
 	boundary->face[boundary_face].b = triface->points[1];
 	boundary->face[boundary_face].c = triface->points[2];
 	if (tetio.trifacemarkerlist != NULL)
-	  boundary->face[boundary_face].m = tetio.trifacemarkerlist[i];
+	  boundary->face_marker[boundary_face] = tetio.trifacemarkerlist[i];
 	else
-	  boundary->face[boundary_face].m = 1;
+	  boundary->face_marker[boundary_face] = 1;
 	boundary_face++;
       }
       

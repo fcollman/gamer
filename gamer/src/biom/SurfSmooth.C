@@ -31,6 +31,7 @@
 
 #include <gamer/biom.h>
 #include "gamercf.h"
+#include <algorithm>
 
 // Declare internal GAMer methods
 FLTVECT GetPositionSurfaceOnly(float, float, float, int, int, int, SurfaceMesh *);
@@ -161,7 +162,7 @@ bool SurfaceMesh_smooth(SurfaceMesh *surfmesh,
     {
 
       // If we have a vertex wich is not selected we continue
-      if (!surfmesh->vertex[n].sel)
+      if (!surfmesh->vertex_select[n])
 	continue;
 
       MoveVerticesSurfaceOnly(surfmesh, n);
@@ -222,7 +223,7 @@ void SurfaceMesh_normalSmooth(SurfaceMesh *surfmesh)
   {
     
     // If we have a vertex wich is not selected we continue
-    if (!surfmesh->vertex[n].sel)
+    if (!surfmesh->vertex_select[n])
     {
       continue;
     }
@@ -280,8 +281,8 @@ void SurfaceMesh_assignActiveSites(SurfaceMesh* surfmesh, ATOM* sphere_list,
       // for coarsening and smoothing
       if (dist < radius)
       {
-	surfmesh->vertex[n].m = sphere_markers[i];
-	surfmesh->vertex[n].sel = false;
+	surfmesh->vertex_marker[n] = sphere_markers[i];
+	surfmesh->vertex_select[n] = false;
 	//printf("vertex: %d marked with %d\n", n, sphere_markers[i]);
       }
     }
@@ -403,7 +404,7 @@ char SurfaceMesh_coarse(SurfaceMesh* surfmesh,
     }
 
     // If the vertex have been flagged to not be removed
-    if (!surfmesh->vertex[n].sel)
+    if (!surfmesh->vertex_select[n])
     {
       //printf("Do not remove vertex %d\n", n);
       continue;
@@ -524,13 +525,13 @@ char SurfaceMesh_coarse(SurfaceMesh* surfmesh,
 	  neighbor_number++;
 	  
 	  // Get face marker
-	  face_marker = surfmesh->face[c].m;
+	  face_marker = surfmesh->face_marker[c];
 
 	  /* delete faces associated with vertex n */
 	  surfmesh->face[c].a = -1;
 	  surfmesh->face[c].b = -1;
 	  surfmesh->face[c].c = -1;
-	  surfmesh->face[c].m = -1;
+	  surfmesh->face_marker[c] = -1;
 	  
 	  /* delete neighbors associated with vertex n */
 	  second_ngr = neighbor_list[a];
@@ -640,7 +641,7 @@ char SurfaceMesh_coarse(SurfaceMesh* surfmesh,
 	/* Smooth the neighbors */
 	for (m = 0; m < neighbor_number; m++) 
 	{
-	  if (!surfmesh->vertex[num].sel)
+	  if (!surfmesh->vertex_select[num])
 	    continue;
 	  num = neighbor_tmp_list[m];
 	  x = surfmesh->vertex[num].x;
@@ -729,8 +730,8 @@ char SurfaceMesh_coarse(SurfaceMesh* surfmesh,
 	surfmesh->vertex[start_index].x = surfmesh->vertex[n].x;
 	surfmesh->vertex[start_index].y = surfmesh->vertex[n].y;
 	surfmesh->vertex[start_index].z = surfmesh->vertex[n].z;
-	surfmesh->vertex[start_index].m = surfmesh->vertex[n].m;
-	surfmesh->vertex[start_index].sel = surfmesh->vertex[n].sel;
+	surfmesh->vertex_marker[start_index] = surfmesh->vertex_marker[n];
+	surfmesh->vertex_select[start_index] = surfmesh->vertex_select[n];
 	neighbor_list[start_index] = neighbor_list[n];
       }
       
@@ -751,14 +752,14 @@ char SurfaceMesh_coarse(SurfaceMesh* surfmesh,
     a = surfmesh->face[n].a;
     b = surfmesh->face[n].b;
     c = surfmesh->face[n].c;
-    face_marker = surfmesh->face[n].m;
+    face_marker = surfmesh->face_marker[n];
     if (a >= 0 && b >= 0 && c >= 0 && 
 	vertex_index[a] >= 0 && vertex_index[b] >= 0 && vertex_index[c] >= 0) 
     {
       surfmesh->face[start_index].a = vertex_index[a];
       surfmesh->face[start_index].b = vertex_index[b];
       surfmesh->face[start_index].c = vertex_index[c];
-      surfmesh->face[start_index].m = face_marker;
+      surfmesh->face_marker[start_index] = face_marker;
       face_index[n] = start_index;
       start_index++;
     }
@@ -848,7 +849,7 @@ void PolygonSubdivision(SurfaceMesh *surfmesh,
     surfmesh->face[face_index].a = a;
     surfmesh->face[face_index].b = b;
     surfmesh->face[face_index].c = c;
-    surfmesh->face[face_index].m = face_marker;
+    surfmesh->face_marker[face_index] = face_marker;
     *face_available_index += 1;
 
     first_ngr = (NPNT3 *)malloc(sizeof(NPNT3));
@@ -1387,7 +1388,7 @@ EIGENVECT GetEigenVector(SurfaceMesh *surfmesh,
     return tmp;
   }
   
-  tx = max(x1, max(x2, x3));
+  tx = (std::max)(x1, (std::max)(x2, x3));
   if (tx == x1) 
   {
     if (x2 >= x3) 
@@ -1998,7 +1999,7 @@ void NormalSmooth(SurfaceMesh *surfmesh, int n)
     tmp_ngr = neighbor_list[b];
 
     // If a vertex is neigbor with a non selected vertex continue
-    if (!surfmesh->vertex[b].sel)
+    if (!surfmesh->vertex_select[b])
       return;
     
     while (tmp_ngr != NULL) 
